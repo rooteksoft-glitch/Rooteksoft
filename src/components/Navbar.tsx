@@ -1,14 +1,50 @@
 "use client"; 
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation'; 
 
 export default function Navbar() {
-  const pathname = usePathname(); 
+  const [activeSection, setActiveSection] = useState("accueil");
 
-  const getLinkStyle = (path: string) => {
-    const isActive = pathname === path;
+  // Liste des sections pour simplifier la gestion
+  const navLinks = [
+    { id: "accueil", label: "accueil" },
+    { id: "services", label: "services" },
+    { id: "portfolio", label: "portfolio" },
+    { id: "commande", label: "commander" },
+    { id: "a-propos", label: "à propos" },
+    { id: "contact", label: "contact" },
+  ];
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-40% 0px -40% 0px', // Déclenche le changement quand la section est au milieu
+      threshold: 0
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // On observe chaque section par son ID
+    navLinks.forEach((link) => {
+      const element = document.getElementById(link.id);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const getLinkStyle = (id: string) => {
+    const isActive = activeSection === id;
     return `transition-all duration-300 ${
       isActive 
         ? "text-blue-600 opacity-100" 
@@ -19,8 +55,8 @@ export default function Navbar() {
   return (
     <nav className="flex justify-between items-center px-10 py-5 bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm">
       
-      {/* 1. LOGO + NOM DE MARQUE */}
-      <Link href="/" className="flex items-center gap-0 group">
+      {/* LOGO */}
+      <Link href="#accueil" className="flex items-center gap-0 group">
         <Image 
           src="/logo1.png" 
           alt="Logo Rooteksoft" 
@@ -34,26 +70,17 @@ export default function Navbar() {
         </div>
       </Link>
 
-      {/* 2. LIENS DE NAVIGATION (Passés en minuscules/capitalize) */}
+      {/* LIENS DE NAVIGATION DYNAMIQUES */}
       <div className="hidden md:flex gap-8 font-bold text-base capitalize">
-        <Link href="/" className={getLinkStyle("/")}>
-          accueil
-        </Link>
-        <Link href="/services" className={getLinkStyle("/services")}>
-          services
-        </Link>
-        <Link href="/portfolio" className={getLinkStyle("/portfolio")}>
-          portfolio
-        </Link>
-        <Link href="/commande" className={getLinkStyle("/commande")}>
-          commander
-        </Link>
-        <Link href="/a-propos" className={getLinkStyle("/a-propos")}>
-          à propos
-        </Link>
-        <Link href="/contact" className={getLinkStyle("/contact")}>
-          contact
-        </Link>
+        {navLinks.map((link) => (
+          <Link 
+            key={link.id} 
+            href={`#${link.id}`} 
+            className={getLinkStyle(link.id)}
+          >
+            {link.label}
+          </Link>
+        ))}
       </div>
     </nav>
   );
