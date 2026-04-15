@@ -154,7 +154,7 @@ export default function CommandePage() {
                 onClick={sendToDesigner}
                 className="w-full bg-green-50 text-green-700 border-2 border-green-200 p-4 rounded-2xl font-bold text-sm hover:bg-green-100 transition-all flex items-center justify-center gap-2"
               >
-                 Envoi devis au designer (Email & WhatsApp)
+                 Envoi commande (Email & WhatsApp)
               </button>
             </div>
           </form>
